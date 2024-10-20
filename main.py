@@ -1,3 +1,4 @@
+from utils import *
 from os.path import join, dirname
 from dotenv import dotenv_values
 from telethon import TelegramClient, events
@@ -5,8 +6,11 @@ from telethon import TelegramClient, events
 dotenv_path = join(dirname(__file__), '.env')
 config = dotenv_values(dotenv_path)
 
-client = TelegramClient('rb_user_session', config["API_ID"], config["API_HASH"])
-bot = TelegramClient('rb_bot_session', config["API_ID"], config["API_HASH"]).start(bot_token=config["BOT_TOKEN"])
+client = TelegramClient('rb_user_session', config['API_ID'], config['API_HASH'])
+bot = TelegramClient('rb_bot_session', config['API_ID'], config['API_HASH']).start(bot_token=config['BOT_TOKEN'])
+
+keywords = {'планируется перекрытие'}
+monitored_chats = ["@roadb_12"]
 
 bot_chats_set = set()
 
@@ -16,11 +20,23 @@ async def handler(event):
     bot_chats_set.add(event.chat_id)
     await event.respond('command /start detected')
 
-@client.on(events.NewMessage(chats="@roadb_12"))
+@client.on(events.NewMessage(chats=monitored_chats))
 async def handler(event):
-    #TODO: сделать пересылку смс (если это возможно, ведь у нас разные клиенты). Или хотя бы с ссылкой на пост в офф. канале
-    for chat_id in bot_chats_set:
-        await bot.send_message(chat_id, event.text)
+    hasSomeKeyword = False
+    strippedText = stripAll(event.text)
+    message = event.message
+    for keyword in keywords:
+        if keyword in strippedText:
+            hasSomeKeyword = True
+            break
+    
+    if hasSomeKeyword:
+        postLink = 't.me/roadb_12/' + str(message.id)
+        text = event.text + ' ' + postLink
+
+        for chat_id in bot_chats_set:
+            #Пересылка сообщения возможна в рамках одного клиента, поэтому мы можем только слать от своего имени
+            await bot.send_message(chat_id, text, link_preview=False)
 
 client.start()
 bot.start()
