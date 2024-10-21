@@ -6,7 +6,7 @@ from telethon import TelegramClient, events
 dotenv_path = join(dirname(__file__), '.env')
 config = dotenv_values(dotenv_path)
 keywords = {'планируется перекрытие'}
-monitored_chats = ["@gibdd_rme"]
+monitored_chats = ['@gibdd_rme', '@mariroads_testsource']
 
 client = TelegramClient('rb_user_session', config['API_ID'], config['API_HASH'])
 
