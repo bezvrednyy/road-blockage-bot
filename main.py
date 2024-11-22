@@ -1,4 +1,6 @@
+import multiprocessing
 from utils import *
+from metrics import *
 from os.path import join, dirname
 from dotenv import dotenv_values
 from telethon import TelegramClient, events
@@ -12,15 +14,22 @@ client = TelegramClient('rb_user_session', config['API_ID'], config['API_HASH'])
 
 @client.on(events.NewMessage(chats=monitored_chats))
 async def handler(event):
-    hasSomeKeyword = False
-    strippedText = stripAll(event.text)
-    for keyword in keywords:
-        if keyword in strippedText:
-            hasSomeKeyword = True
-            break
-    
-    if hasSomeKeyword:
-        await event.message.forward_to(config['TARGET_CHANEL_ID'])
+  hasSomeKeyword = False
+  strippedText = stripAll(event.text)
+  for keyword in keywords:
+    if keyword in strippedText:
+      hasSomeKeyword = True
+      break
+  
+  if hasSomeKeyword:
+      await event.message.forward_to(config['TARGET_CHANEL_ID'])
 
-client.start()
-client.run_until_disconnected()
+
+if __name__ == '__main__':
+  bg_send_metrics = multiprocessing.Process(target=send_metrics)
+  bg_send_metrics.start()
+
+  client.start()
+  client.run_until_disconnected()
+
+  bg_send_metrics.terminate()
