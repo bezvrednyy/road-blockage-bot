@@ -4,7 +4,7 @@ import boto3
 CloudWatch = boto3.client('cloudwatch')
 
 def send_metrics():
-	wait_time = 5*60
+	wait_time = 4*60
 	while True:
 		CloudWatch.put_metric_data(
 			Namespace='Test_Namespace',
