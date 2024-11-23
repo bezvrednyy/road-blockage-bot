@@ -1,2 +1,2 @@
 def stripAll(value: str):
-    return " ".join(value.split())
+  return " ".join(value.split())
